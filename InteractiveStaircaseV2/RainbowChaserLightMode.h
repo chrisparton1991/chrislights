@@ -1,5 +1,5 @@
-#ifndef BRIDGE_LIGHT_MODE_H
-#define BRIDGE_LIGHT_MODE_H
+#ifndef RAINBOW_CHASER_LIGHT_MODE_H
+#define RAINBOW_CHASER_LIGHT_MODE_H`
 
 #define NO_ACTIVE_STEP 255
 
@@ -17,6 +17,7 @@ class RainbowChaserLightMode : public AbstractLightMode {
     uint8_t findFirstActiveStep();
     uint8_t findLastActiveStep();
     void updateLeds();
+    float getStepBrightness(uint8_t stepIndex);
     void setStepBrightness(uint8_t stepIndex, float brightness);
 };
 
@@ -31,9 +32,9 @@ void RainbowChaserLightMode::readSensors() {
 
   for (uint8_t i = 0; i < NUM_STEPS; i++) {
     if (firstStep != NO_ACTIVE_STEP && (i >= firstStep && i <= lastStep)) {
-      stepBrightness[i] -= 30.0f;
+      stepBrightness[i] -= 20.0f;
     } else {
-      stepBrightness[i] += 30.0f;
+      stepBrightness[i] += 1.0f;
     }
 
     stepBrightness[i] = constrain(stepBrightness[i], 0, 255);
@@ -63,8 +64,20 @@ uint8_t RainbowChaserLightMode::findLastActiveStep() {
 void RainbowChaserLightMode::updateLeds() {
   fill_rainbow(leds, NUM_LEDS, progress++);
   for (uint8_t i = 0; i < NUM_STEPS; i++) {
-    setStepBrightness(i, stepBrightness[i]);
+    setStepBrightness(i, getStepBrightness(i));
   }
+}
+
+float RainbowChaserLightMode::getStepBrightness(uint8_t stepIndex) {
+  uint8_t startIndex = (stepIndex == 0) ? 0 : stepIndex - 1;
+  uint8_t endIndex = (stepIndex == NUM_STEPS - 1) ? NUM_STEPS - 1 : stepIndex + 1;
+
+  float lowestBrightness = stepBrightness[startIndex];
+  for (uint8_t i = startIndex; i <= endIndex; i++) {
+    lowestBrightness = min(lowestBrightness, stepBrightness[i]);
+  }
+
+  return lowestBrightness;
 }
 
 void RainbowChaserLightMode::setStepBrightness(uint8_t stepIndex, float brightness) {

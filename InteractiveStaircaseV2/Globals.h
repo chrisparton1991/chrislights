@@ -1,7 +1,7 @@
 #ifndef GLOBALS_H
 #define GLOBALS_H
 
-#define NUM_LEDS 124
+#define NUM_LEDS 114
 #define NUM_STEPS 12
 #define MODE_CHANGE_PIN A2
 #define DATA_PIN_1 A0 // Left LED strip

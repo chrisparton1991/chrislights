@@ -13,9 +13,13 @@ class SplashLightMode : public AbstractLightMode {
     void clearPreviousFrame();
     void onUpdate();
   private:
-    uint32_t inactiveTime = 0;
     uint32_t stepTimes[NUM_STEPS] = {};
-    CRGB stepColors[NUM_STEPS] = {CRGB::Red, CRGB::Green, CRGB::Blue, CRGB::Gold, CRGB::Purple, CRGB::Orange, CRGB::Magenta, CRGB::Cyan, CRGB::LightCoral, CRGB::LightSeaGreen, CRGB::MidnightBlue, CRGB::MintCream};
+    uint32_t inactiveTime = 0;
+    uint8_t lastActiveStep = 0;
+    CRGB stepColors[NUM_STEPS] = {
+      CRGB::Red, CRGB::Green, CRGB::Blue, CRGB::Gold, CRGB::Purple, CRGB::White,
+      CRGB::Red, CRGB::Green, CRGB::Blue, CRGB::Gold, CRGB::Purple, CRGB::White
+    };
 
     void readSensors();
     void updateLeds();
@@ -51,19 +55,21 @@ void SplashLightMode::updateLeds() {
   CRGB color = CRGB::Black;
   
   if (activeStepIndex == NO_ACTIVE_STEPS) {
-    return; // Do nothing
-//    inactiveStepTime = inactiveStepTime == 0 ? millis() : inactiveStepTime;
-//    stepTime = inactiveStepTime;
+    inactiveTime = inactiveTime == 0 ? millis() : inactiveTime;
+    stepTime = millis() - inactiveTime;
+    activeStepIndex = lastActiveStep;
   } else {
     inactiveTime = 0;
     stepTime = millis() - stepTimes[activeStepIndex];
     color = stepColors[activeStepIndex];
+    lastActiveStep = activeStepIndex;
   }
 
+  uint8_t stepLed = getStepLeds(activeStepIndex).middle;
   stepTime = constrain(stepTime, 0, FILL_DURATION);
   uint8_t distance = map(stepTime, 0, FILL_DURATION, 0, NUM_LEDS);
-  uint8_t startLed = max(0, getStepLeds(activeStepIndex).middle - distance);
-  uint8_t endLed = min(NUM_LEDS - 1, getStepLeds(activeStepIndex).middle + distance);
+  uint8_t startLed = max(0, stepLed - distance);
+  uint8_t endLed = min(NUM_LEDS - 1, stepLed + distance);
 
   for (uint8_t i = startLed; i <= endLed; i++) {
     setLed(i, color);

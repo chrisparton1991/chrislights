@@ -1,15 +1,17 @@
 #include <FastLED.h>
 #include "Globals.h"
 #include "AbstractLightMode.h"
+#include "FireLightMode.h"
 #include "ParticleLightMode.h"
 #include "RainbowChaserLightMode.h"
 #include "SplashLightMode.h"
 #include "TrailLightMode.h"
 
-#define NUM_LIGHT_MODES 4
+#define NUM_LIGHT_MODES 5
 
 bool modeChangePressed = false;
 uint8_t mode = 0;
+uint32_t lastMillis = 0;
 AbstractLightMode* lightMode = 0;
 
 void setup() {
@@ -41,7 +43,11 @@ void loop() {
     modeChangePressed = modeButtonState;
   }
 
-  EVERY_N_MILLIS(10) {
+  uint32_t elapsedMs = millis() - lastMillis;
+  uint8_t minMs = 1000 / lightMode->getFps();
+  
+  if (elapsedMs >= minMs) {
+    lastMillis = millis();
     lightMode->clearPreviousFrame();
     lightMode->onUpdate();
     FastLED.show();
@@ -53,14 +59,18 @@ void setLightMode(int modeIndex) {
     delete lightMode;
   }
 
+  fill_solid(leds, NUM_LEDS, CRGB::Black);
+
   if (modeIndex == 0) {
-    lightMode = new TrailLightMode(CRGB::Blue);
+    lightMode = new TrailLightMode();
   } else if (modeIndex == 1) {
     lightMode = new RainbowChaserLightMode();
   } else if (modeIndex == 2) {
     lightMode = new ParticleLightMode();
   } else if (modeIndex == 3) {
     lightMode = new SplashLightMode();
+  } else if (modeIndex == 4) {
+    lightMode = new FireLightMode();
   }
 }
 
