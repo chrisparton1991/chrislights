@@ -88,9 +88,7 @@ void ParticleLightMode::applyPhysics(uint8_t particleIndex, bool hasAttractor) {
   particle.position += particle.velocity;
   particle.position = constrain(particle.position, -10, NUM_LEDS + 10);
   particle.velocity *= .99f;
-    
-
- particle.acceleration = 0;
+  particle.acceleration = 0;
 }
 
 void ParticleLightMode::renderParticle(Particle& particle, uint8_t particleIndex) {
