@@ -12,7 +12,6 @@ struct Particle {
   float position;
   float velocity;
   float acceleration;
-  uint8_t distanceFromAttractor;
 };
 
 CRGB particleColors[NUM_COLORS] = {CRGB::Red, CRGB::Green, CRGB::Blue, CRGB::Yellow};
